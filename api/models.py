@@ -1,6 +1,6 @@
 from django.db import models
+from django.conf import settings
 
-from django.db import models
 
 class User(models.Model):
   """User model represents a user in the system"""
@@ -19,13 +19,15 @@ class Account(models.Model):
   """Account model represents a financial start/endpoint for transactions"""
 
   ACCOUNT_TYPES = [
-    ("checking", "Checking"),
-    ("savings", "Savings"),
-    ("cash", "Cash"),
+    ("credit", "Credit"),
+    ("debit", "Debit"),
   ]
 
   user       = models.ForeignKey(
-    User, on_delete=models.CASCADE, related_name="accounts")
+    settings.AUTH_USER_MODEL,
+    on_delete=models.CASCADE,
+    related_name="accounts"
+  )
   name       = models.CharField(max_length=150)
   type       = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
   balance    = models.FloatField(default=0.0)
@@ -41,11 +43,14 @@ class Category(models.Model):
   
   CATEGORY_TYPES = [
     ("income", "Income"),
-    ("expense", "Expense"),
+    ("expense", "Expense")
   ]
 
   user       = models.ForeignKey(
-    User, on_delete=models.CASCADE, related_name="categories")
+    settings.AUTH_USER_MODEL,
+    on_delete=models.CASCADE, 
+    related_name="categories"
+  )
   name       = models.CharField(max_length=150)
   type       = models.CharField(max_length=20, choices=CATEGORY_TYPES)
   colour     = models.CharField(max_length=7, default="#000000")
@@ -86,7 +91,10 @@ class Budget(models.Model):
   ]
 
   user         = models.ForeignKey(
-    User, on_delete=models.CASCADE, related_name="budgets")
+    settings.AUTH_USER_MODEL,
+    on_delete=models.CASCADE,
+    related_name="budgets"
+  )
   category     = models.ForeignKey(Category, on_delete=models.CASCADE)
   amount_limit = models.FloatField()
   period       = models.CharField(max_length=20, choices=PERIOD_TYPES)
