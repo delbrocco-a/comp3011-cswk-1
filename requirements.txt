@@ -177,7 +177,6 @@ rustworkx==0.17.1
 scikit-learn==1.6.1
 scipy==1.15.2
 seaborn==0.13.2
-sepolicy @ file:///builddir/build/BUILD/policycoreutils-3.7-build/selinux-3.7/python/sepolicy
 setools==4.5.1
 setuptools==69.2.0
 simpleaudio==1.0.4
