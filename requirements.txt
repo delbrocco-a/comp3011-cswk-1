@@ -159,8 +159,6 @@ pytz==2025.1
 pyudev==0.24.3
 pyxdg==0.27
 PyYAML==6.0.1
-pyynl @ file:///builddir/build/BUILD/kernel-6.17.10-build/kernel-6.17.10/linux-6.17.10-100.fc41.x86_64/tools/net/ynl
-pyzmq==27.1.0
 qiskit==2.3.0
 qiskit-aer==0.17.2
 qiskit-machine-learning==0.9.0
