@@ -19,4 +19,9 @@ urlpatterns = [
   path("auth/register/", views.register, name="register"),
   path("auth/login/", views.login, name="login"),
   path("auth/logout/", views.logout, name="logout"),
+  path("analytics/summary/", views.summary, name="summary"),
+  path("analytics/spending-by-category/", 
+    views.spending_by_category, name="spending-by-category"),
+  path("analytics/trends/", views.trends, name="trends"),
+  path("analytics/budget-status/", views.budget_status, name="budget-status")
 ]
