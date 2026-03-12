@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from .models import Account, Category, Transaction, Budget
+
 
 REGO_PATH = "/api/auth/register/"
 AUTH_PATH = "/api/auth/login/"
@@ -148,4 +150,72 @@ class AccountTests(TestCase):
 
     ### get accounts, require 401 unauthorised response
     response = self.client.get('/api/accounts/')
+    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class AnalyticsTests(TestCase):
+  def setUp(self):
+    self.client = APIClient()
+    self.user = User.objects.create_user(
+      username=USER_SIGN_IN["username"],
+      password=USER_SIGN_IN["password"]
+    )
+    self.client.force_authenticate(user=self.user)
+
+    # Create prerequisite data
+    self.account = Account.objects.create(
+        user=self.user,
+        name="Main Account",
+        type="checking",
+        balance=2000.0,
+        currency="GBP"
+    )
+    self.category = Category.objects.create(
+        user=self.user,
+        name="Groceries",
+        type="expense",
+        colour="#FF5733"
+    )
+    Transaction.objects.create(
+        account=self.account,
+        category=self.category,
+        amount=45.50,
+        type="expense",
+        description="Weekly shop",
+        date="2026-03-12T12:00:00Z"
+    )
+
+  def test_summary(self):
+    response = self.client.get('/api/analytics/summary/?month=2026-03')
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertIn('total_expenses', response.data)
+    self.assertIn('total_income', response.data)
+    self.assertIn('net_savings', response.data)
+
+  def test_summary_invalid_month(self):
+    response = self.client.get('/api/analytics/summary/?month=badformat')
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+  def test_spending_by_category_alltime(self):
+    response = self.client.get('/api/analytics/spending-by-category/')
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertIn('breakdown', response.data)
+
+  def test_spending_by_category_by_month(self):
+    response = self.client.get('/api/analytics/spending-by-category/?month=2026-03')
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.data['month'], '2026-03')
+
+  def test_trends(self):
+    response = self.client.get('/api/analytics/trends/?months=3')
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertIn('trends', response.data)
+
+  def test_budget_status(self):
+    response = self.client.get('/api/analytics/budget-status/')
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertIn('budgets', response.data)
+
+  def test_unauthenticated_analytics(self):
+    self.client.force_authenticate(user=None)
+    response = self.client.get('/api/analytics/summary/?month=2026-03')
     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
