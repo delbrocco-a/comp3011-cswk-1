@@ -126,3 +126,9 @@ Tests are also run automatically on every push via GitHub Actions.
 ## API Documentation
 
 Full API documentation is available in `docs`
+
+## Author & Support
+
+For issues or questions, please open a GitHub issue on this repository.
+
+Maintained by [delbrocco-a](https://github.com/delbrocco-a)
