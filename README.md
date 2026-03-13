@@ -5,7 +5,7 @@
 ---
 
 
-A REST API for personal finance management, built as part of the COMP3011 Web Services and Web Data module at the University of Leeds. The API allows users to track income and expenses, manage accounts, set budgets, and query spending analytics — essentially a lightweight backend for a personal accounting system supporting basic credit/debit operations across multiple accounts and categories.
+A REST API for personal finance management, built as part of the COMP3011 Web Services and Web Data module at the University of Leeds. The API allows users to track income and expenses, manage accounts, set budgets, and query spending analytics, which is essentially a lightweight backend for a personal accounting system supporting basic credit/debit operations across multiple accounts and categories.
 
 ## Production (prod branch) Deployment & Stack
 
@@ -24,7 +24,7 @@ A REST API for personal finance management, built as part of the COMP3011 Web Se
 
 ## Pre-Setup
 
-The API is structured around five core models — Accounts, Transactions, Categories, Budgets, and Users attempting to abide REST conventions closesly throughout. Accounts represent real-world financial accounts (like credit accounts eg checking, savings, cash, and debit accounts, eg food shopping, luxeries, holidays etc); transactions record individual income or expense operations against those aforementioned accounts, and categories allow users to organise spending into meaningful groups, and budget endpoints allow users to set spending limits per category. To provide a basic functionality to these models, outside of storing the data, analytics endpoints aggregate transaction data to provide monthly summaries, spending breakdowns, and multi-month trend analysis. All endpoints should require token-based authentication, meaning users only ever see and interact with their own data, however note that this project is in it's early stages, and thorough security analysis and checks haven't been carried out: THE PROJECT CONTRIBUTORS TAKE NO ACCOUNTABLILITY FOR THE SECURITY OF THIS API AS IT IS AN ACADEMIC EXERCISE, AND USERS SHOULD ADAPT IT TO THEIR OWN SECURITY NEEDS.
+The API is structured around five core models: Accounts, Transactions, Categories, Budgets, and Users attempting to abide REST conventions closesly throughout. Accounts represent real-world financial accounts (like credit accounts eg checking, savings, cash, and debit accounts, eg food shopping, luxeries, holidays etc); transactions record individual income or expense operations against those aforementioned accounts, and categories allow users to organise spending into meaningful groups, and budget endpoints allow users to set spending limits per category. To provide a basic functionality to these models, outside of storing the data, analytics endpoints aggregate transaction data to provide monthly summaries, spending breakdowns, and multi-month trend analysis. All endpoints should require token-based authentication, meaning users only ever see and interact with their own data, however note that this project is in it's early stages, and thorough security analysis and checks haven't been carried out: THE PROJECT CONTRIBUTORS TAKE NO ACCOUNTABLILITY FOR THE SECURITY OF THIS API AS IT IS AN ACADEMIC EXERCISE, AND USERS SHOULD ADAPT IT TO THEIR OWN SECURITY NEEDS.
 
 ## Set-up 
 
