@@ -10,10 +10,16 @@ from django.contrib.auth import authenticate
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import datetime
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 import calendar
 import requests
 
 
+@extend_schema(
+  description="Register a new user and receive an authentication token.",
+  request={"application/json": {"example": {"username": "testuser", "password": "testpass123", "email": "test@test.com"}}},
+  responses={201: {"example": {"token": "abc123..."}}}
+)
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def register(request) -> Response:
@@ -58,6 +64,11 @@ def register(request) -> Response:
   return Response({"token": token.key}, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(
+  description="Login with existing credentials and receive an authentication token.",
+  request={"application/json": {"example": {"username": "testuser", "password": "testpass123"}}},
+  responses={200: {"example": {"token": "abc123..."}}}
+)
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def login(request) -> Response:
@@ -98,6 +109,10 @@ def logout(request) -> Response:
   return Response({"message": "Logged out"}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+  description="Returns total income, expenses and net savings for a given month.",
+  parameters=[OpenApiParameter(name='month', description='Month in YYYY-MM format', required=True, type=str)]
+)
 @api_view(["GET"])
 def summary(request) -> Response:
   """GET /api/analytics/summary/?month=2026-03"""
@@ -135,6 +150,10 @@ def summary(request) -> Response:
   }, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+  description="Returns spending broken down by category. Optionally filter by month.",
+  parameters=[OpenApiParameter(name='month', description='Optional month in YYYY-MM format', required=False, type=str)]
+)
 @api_view(["GET"])
 def spending_by_category(request) -> Response:
   """GET /api/analytics/spending-by-category/?month=2026-03"""
@@ -170,6 +189,11 @@ def spending_by_category(request) -> Response:
   }, status=status.HTTP_200_OK)
 
 
+
+@extend_schema(
+  description="Returns month-over-month income vs expense trends.",
+  parameters=[OpenApiParameter(name='months', description='Number of months to look back (default 6)', required=False, type=int)]
+)
 @api_view(["GET"])
 def trends(request) -> Response:
   """GET /api/analytics/trends/?months=6"""
@@ -214,6 +238,9 @@ def trends(request) -> Response:
   return Response({"trends": result}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+  description="Returns spending status for each active budget including amount spent, remaining, and percentage used."
+)
 @api_view(["GET"])
 def budget_status(request) -> Response:
   """GET /api/analytics/budget-status/"""
@@ -249,6 +276,10 @@ def budget_status(request) -> Response:
   return Response({"budgets": result}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+  description="Converts all account balances to a base currency using live exchange rates from open.er-api.com.",
+  parameters=[OpenApiParameter(name='base', description='Base currency code (default GBP)', required=False, type=str)]
+)
 @api_view(["GET"])
 def currency_summary(request) -> Response:
   """GET /api/analytics/currency-summary/?base=GBP"""
@@ -277,7 +308,10 @@ def currency_summary(request) -> Response:
 
 
 class AccountViewSet(viewsets.ModelViewSet):
-  """Handle account crud operations"""
+  """
+  Manage bank accounts. Supports checking, savings, and cash account types.
+  All accounts are scoped to the authenticated user.
+  """
 
   serializer_class = AccountSerializer
   permission_classes = [permissions.IsAuthenticated]
@@ -290,7 +324,10 @@ class AccountViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-  """Handle category crud operations"""
+  """
+  Manage income and expense transactions against accounts.
+  All transactions are scoped to the authenticated user's accounts.
+  """
 
   serializer_class = CategorySerializer
   permission_classes = [permissions.IsAuthenticated]
@@ -303,7 +340,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
-  """Handle transaction crud operations"""
+  """
+  Manage transaction categories for organising income and expenses.
+  """
 
   serializer_class = TransactionSerializer
   permission_classes = [permissions.IsAuthenticated]
@@ -316,7 +355,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 
 class BudgetViewSet(viewsets.ModelViewSet):
-  """Handle budget crud operations"""
+  """
+  Manage spending budgets per category on a monthly or weekly basis.
+  """
 
   serializer_class = BudgetSerializer
   permission_classes = [permissions.IsAuthenticated]
