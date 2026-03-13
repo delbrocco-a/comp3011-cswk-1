@@ -149,7 +149,7 @@ class AccountTests(TestCase):
     self.client.force_authenticate(user=None)
 
     ### get accounts, require 401 unauthorised response
-    response = self.client.get('/api/accounts/')
+    response = self.client.get("/api/accounts/")
     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 class AnalyticsTests(TestCase):
@@ -185,37 +185,103 @@ class AnalyticsTests(TestCase):
     )
 
   def test_summary(self):
-    response = self.client.get('/api/analytics/summary/?month=2026-03')
+    response = self.client.get("/api/analytics/summary/?month=2026-03")
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertIn('total_expenses', response.data)
-    self.assertIn('total_income', response.data)
-    self.assertIn('net_savings', response.data)
+    self.assertIn("total_expenses", response.data)
+    self.assertIn("total_income", response.data)
+    self.assertIn("net_savings", response.data)
 
   def test_summary_invalid_month(self):
-    response = self.client.get('/api/analytics/summary/?month=badformat')
+    response = self.client.get("/api/analytics/summary/?month=badformat")
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
   def test_spending_by_category_alltime(self):
-    response = self.client.get('/api/analytics/spending-by-category/')
+    response = self.client.get("/api/analytics/spending-by-category/")
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertIn('breakdown', response.data)
+    self.assertIn("breakdown", response.data)
 
   def test_spending_by_category_by_month(self):
-    response = self.client.get('/api/analytics/spending-by-category/?month=2026-03')
+    response = self.client.get("/api/analytics/spending-by-category/?month=2026-03")
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(response.data['month'], '2026-03')
+    self.assertEqual(response.data["month"], "2026-03")
 
   def test_trends(self):
-    response = self.client.get('/api/analytics/trends/?months=3')
+    response = self.client.get("/api/analytics/trends/?months=3")
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertIn('trends', response.data)
+    self.assertIn("trends", response.data)
 
   def test_budget_status(self):
-    response = self.client.get('/api/analytics/budget-status/')
+    response = self.client.get("/api/analytics/budget-status/")
     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertIn('budgets', response.data)
+    self.assertIn("budgets", response.data)
 
   def test_unauthenticated_analytics(self):
     self.client.force_authenticate(user=None)
-    response = self.client.get('/api/analytics/summary/?month=2026-03')
+    response = self.client.get("/api/analytics/summary/?month=2026-03")
     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class CurrencyTests(TestCase):
+  """Currency summary analytics functionality"""
+
+  def setUp(self):
+    self.client = APIClient()
+    self.user = User.objects.create_user(
+      username=USER_SIGN_IN["username"],
+      password=USER_SIGN_IN["password"]
+    )
+    self.client.force_authenticate(user=self.user)
+
+    ### accounts in different currencies
+    Account.objects.create(
+      user=self.user,
+      name="UK Current",
+      type="checking",
+      balance=2000.0,
+      currency="GBP"
+    )
+    Account.objects.create(
+      user=self.user,
+      name="US Savings",
+      type="savings",
+      balance=500.0,
+      currency="USD"
+    )
+    Account.objects.create(
+      user=self.user,
+      name="Euro Cash",
+      type="cash",
+      balance=300.0,
+      currency="EUR"
+    )
+
+  def test_currency_summary_default(self):
+    """Test currency summary defaults to GBP base"""
+    response = self.client.get("/api/analytics/currency-summary/")
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertIn("summary", response.data)
+    self.assertEqual(response.data["base"], "GBP")
+
+  def test_currency_summary_custom_base(self):
+    """Test currency summary with custom base currency"""
+    response = self.client.get("/api/analytics/currency-summary/?base=USD")
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.data["base"], "USD")
+
+  def test_currency_summary_returns_all_accounts(self):
+    """Test currency summary returns all user accounts"""
+    response = self.client.get("/api/analytics/currency-summary/")
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(len(response.data["summary"]), 3)
+
+  def test_currency_summary_unauthenticated(self):
+    """Test currency summary requires authentication"""
+    self.client.force_authenticate(user=None)
+    response = self.client.get("/api/analytics/currency-summary/")
+    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+  def test_currency_summary_no_accounts(self):
+    """Test currency summary with no accounts returns empty list"""
+    Account.objects.filter(user=self.user).delete()
+    response = self.client.get("/api/analytics/currency-summary/")
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(response.data["summary"], [])
