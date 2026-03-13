@@ -11,6 +11,7 @@ A REST API for personal finance management, built as part of the COMP3011 Web Se
 
 > https://delbrocco.pythonanywhere.com/api/
 
+- **Comms -** JSON
 - **Language -** Python (3.13)
 - **Framework -** Django (5.2) [REST Framework] (3)
 - **Database -** SQLite3
@@ -70,6 +71,9 @@ There are four principle data models, each linked to an individual user:
 | Transaction | A representation of a credit to a debit between two accounts |
 | Category | Akin to "labels"; categorisation of transactions |
 | Budget | Spending tacker for a given category (with limits) |
+
+All requests and responses use JSON format, with standard HTTP status codes used 
+throughout to indicate success, client errors, and authentication failures.
 
 ### Authentication
 | Method | Endpoint | Description |
