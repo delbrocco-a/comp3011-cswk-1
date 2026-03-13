@@ -23,5 +23,7 @@ urlpatterns = [
   path("analytics/spending-by-category/", 
     views.spending_by_category, name="spending-by-category"),
   path("analytics/trends/", views.trends, name="trends"),
-  path("analytics/budget-status/", views.budget_status, name="budget-status")
+  path("analytics/budget-status/", views.budget_status, name="budget-status"),
+  path("analytics/currency-summary/",
+    views.currency_summary, name="currency-summary")
 ]

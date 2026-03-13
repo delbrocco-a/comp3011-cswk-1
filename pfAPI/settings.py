@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'api'
+    'api',
+    'drf_spectacular'
 ]
 
 MIDDLEWARE = [
@@ -124,6 +125,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'UNAUTHENTICATED_TOKEN': None,  # forces 401 instead of 403
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -132,3 +134,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Personal Finance & Budget API',
+    'DESCRIPTION': 'A REST API for personal finance management, supporting transaction tracking, budget management, and spending analytics.',
+    'VERSION': '1.0.0',
+    'CONTACT': {'name': 'delbrocco'}
+}
