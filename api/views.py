@@ -11,6 +11,7 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import datetime
 import calendar
+import requests
 
 
 @api_view(["POST"])
@@ -246,6 +247,33 @@ def budget_status(request) -> Response:
     })
 
   return Response({"budgets": result}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def currency_summary(request) -> Response:
+  """GET /api/analytics/currency-summary/?base=GBP"""
+
+  ### api is uk based
+  base = request.query_params.get("base", "GBP")
+  
+  ### open API required no key for use
+  rates = requests.get(f"https://open.er-api.com/v6/latest/{base}").json()
+  
+  accounts = Account.objects.filter(user=request.user)
+  result = []
+
+  ### grab all accounts, and summarise with gbp as base currency
+  for account in accounts:
+    rate = rates["rates"].get(account.currency, 1)
+    result.append({
+      "account"          : account.name,
+      "original_balance" : account.balance,
+      "original_currency": account.currency,
+      "converted_balance": round(account.balance / rate, 2),
+      "base_currency"    : base
+    })
+  
+  return Response({'summary': result, 'base': base})
 
 
 class AccountViewSet(viewsets.ModelViewSet):
