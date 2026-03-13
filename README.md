@@ -4,15 +4,27 @@
 
 ---
 
-REST based API implementing basic credit/debit accounting, and income/expense operations.
+
+A REST API for personal finance management, built as part of the COMP3011 Web Services and Web Data module at the University of Leeds. The API allows users to track income and expenses, manage accounts, set budgets, and query spending analytics — essentially a lightweight backend for a personal accounting system supporting basic credit/debit operations across multiple accounts and categories.
 
 ## Production (prod branch) Deployment & Stack
-https://delbrocco.pythonanywhere.com/api/
 
-- **Framework:** Django 5.2 (REST Framework)
-- **Database:** SQLite
-- **Authentication:** Token-based (DRF AuthToken)
-- **Testing:** Django TestCase + GitHub Actions CI
+> https://delbrocco.pythonanywhere.com/api/
+
+- **Language -** Python (3.13)
+- **Framework -** Django (5.2) [REST Framework] (3)
+- **Database -** SQLite3
+- **Authentication -** Token-based (DRF AuthToken)
+- **Auto Docs -** drf-spectacular (OpenAPI 3)
+- **Testing -** Django (TestCase) & DRF APIClient
+- **CI/CD -** Done in Github Actions/Workflow
+- **Deployment Architecture -** (handled by pythonanywhere)
+
+> NB All versions listed are the version the initial API was written in, and for any version, users should refer to the dependencies in requirements.txt
+
+## Pre-Setup
+
+The API is structured around five core models — Accounts, Transactions, Categories, Budgets, and Users attempting to abide REST conventions closesly throughout. Accounts represent real-world financial accounts (like credit accounts eg checking, savings, cash, and debit accounts, eg food shopping, luxeries, holidays etc); transactions record individual income or expense operations against those aforementioned accounts, and categories allow users to organise spending into meaningful groups, and budget endpoints allow users to set spending limits per category. To provide a basic functionality to these models, outside of storing the data, analytics endpoints aggregate transaction data to provide monthly summaries, spending breakdowns, and multi-month trend analysis. All endpoints should require token-based authentication, meaning users only ever see and interact with their own data, however note that this project is in it's early stages, and thorough security analysis and checks haven't been carried out: THE PROJECT CONTRIBUTORS TAKE NO ACCOUNTABLILITY FOR THE SECURITY OF THIS API AS IT IS AN ACADEMIC EXERCISE, AND USERS SHOULD ADAPT IT TO THEIR OWN SECURITY NEEDS.
 
 ## Set-up 
 
@@ -99,13 +111,15 @@ There are four principle data models, each linked to an individual user:
 | DELETE | `/api/budgets/{id}/` | Delete a budget |
 
 ### Analytics
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/analytics/summary/?month=YYYY-MM` | Income, expenses, and net savings |
-| GET | `/api/analytics/spending-by-category/` | Lifetime spending per category |
-| GET | `/api/analytics/spending-by-category/?month=YYYY-MM` | Monthly spending per category |
-| GET | `/api/analytics/trends/?months=N` | Month-over-month income vs expense trend |
-| GET | `/api/analytics/budget-status/` | Budget usage and remaining amounts |
+
+The analytics are all GET operations, with logic processing being completed by the server. Note that this is not multithreaded, and hence will not be able to reasonably compensate a load greater than a single user.
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/analytics/summary/?month=YYYY-MM` | Income, expenses, and net savings |
+| `/api/analytics/spending-by-category/?month=YYYY-MM` | Monthly spending per category |
+| `/api/analytics/trends/?months=N` | Month-over-month income vs expense trend |
+| `/api/analytics/budget-status/` | Budget usage and remaining amounts |
 
 ## Authentication
 
