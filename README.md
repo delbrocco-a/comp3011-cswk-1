@@ -1,6 +1,6 @@
 ---
 
-# COMP3011 - Personal Financing API
+Personal Financing API
 
 ---
 
